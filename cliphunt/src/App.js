@@ -1,12 +1,9 @@
-import logo from './logo.svg';
-import './App.css';
-
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function Home() {
   const clips = [
-    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/123" },
-    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/456" },
+    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
+    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
   ];
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -18,7 +15,7 @@ function Home() {
       <h2>Clip Feed</h2>
       {clips.map(clip => (
         <div key={clip.id} style={{ margin: '10px' }}>
-          <p>{clip.title} - <a href={clip.url} target="_blank">Watch</a></p>
+          <p>{clip.title} - <a href={clip.url} target="_blank" rel="noopener noreferrer">Watch</a></p>
         </div>
       ))}
       <Link to="/library">Go to Library</Link>
