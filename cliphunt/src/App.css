@@ -49,3 +49,15 @@
   padding: 10px;
   text-align: center;
 }
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #2980b9;
+}
