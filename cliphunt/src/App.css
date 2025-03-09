@@ -61,3 +61,16 @@ button {
 button:hover {
   background-color: #2980b9;
 }
+
+.library-feed {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin: 20px;
+}
+
+.library-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}

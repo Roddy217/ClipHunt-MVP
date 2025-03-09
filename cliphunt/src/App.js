@@ -41,11 +41,13 @@ function Library({ ownedClips }) {
       {ownedClips.length === 0 ? (
         <p>No clips hunted yet!</p>
       ) : (
-        ownedClips.map(clip => (
-          <div key={clip.id} style={{ margin: '10px' }}>
-            <p>{clip.title}</p>
-          </div>
-        ))
+        <div className="library-feed">
+          {ownedClips.map(clip => (
+            <div key={clip.id} className="library-item">
+              <p>{clip.title}</p>
+            </div>
+          ))}
+        </div>
       )}
       <Link to="/">Back to Home</Link>
     </div>
