@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import './App.css'; // Add this if not already there
+import './App.css'; // Add this!
 
 function Home() {
   const clips = [
