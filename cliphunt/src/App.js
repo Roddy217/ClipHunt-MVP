@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import './App.css'; // Add this if not already there
 
 function Home() {
   const clips = [
@@ -13,11 +14,13 @@ function Home() {
         Start Hunting
       </button>
       <h2>Clip Feed</h2>
-      {clips.map(clip => (
-        <div key={clip.id} style={{ margin: '10px' }}>
-          <p>{clip.title} - <a href={clip.url} target="_blank" rel="noopener noreferrer">Watch</a></p>
-        </div>
-      ))}
+      <div className="clip-feed">
+        {clips.map(clip => (
+          <div key={clip.id} className="clip-item">
+            <p>{clip.title} - <a href={clip.url} target="_blank" rel="noopener noreferrer">Watch</a></p>
+          </div>
+        ))}
+      </div>
       <Link to="/library">Go to Library</Link>
     </div>
   );
