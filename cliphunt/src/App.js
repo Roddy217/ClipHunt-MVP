@@ -1,21 +1,26 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import React, { useState } from 'react'; // Add this!
+import React, { useState } from 'react';
 import './App.css';
 
-function Home({ ownedClips, setOwnedClips }) { // Pass props
+function Home({ ownedClips, setOwnedClips }) {
   const [clips, setClips] = useState([
     { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
     { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
   ]);
   const handleHunt = () => {
+    // Pick a random clip
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
-    setOwnedClips([...ownedClips, randomClip]);
+    // Check if clip is already in ownedClips
+    const alreadyOwned = ownedClips.some(clip => clip.id === randomClip.id);
+    if (!alreadyOwned) {
+      setOwnedClips([...ownedClips, randomClip]);
+    }
   };
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>ClipHunt</h1>
       <p>Hunt clips, trade with friends, and win rewards!</p>
-      <button className="hunt-button" onClick={handleHunt}>Start Hunting</button>
+      <button onClick={handleHunt}>Start Hunting</button>
       <h2>Clip Feed</h2>
       <div className="clip-feed">
         {clips.map(clip => (
@@ -29,7 +34,7 @@ function Home({ ownedClips, setOwnedClips }) { // Pass props
   );
 }
 
-function Library({ ownedClips }) { // Receive props
+function Library({ ownedClips }) {
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>My Library</h1>
@@ -48,7 +53,7 @@ function Library({ ownedClips }) { // Receive props
 }
 
 function App() {
-  const [ownedClips, setOwnedClips] = useState([]); // Lift state to App
+  const [ownedClips, setOwnedClips] = useState([]);
   return (
     <Router>
       <Routes>
