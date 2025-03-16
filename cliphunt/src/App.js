@@ -7,13 +7,7 @@ import './App.css';
 // Initialize Stripe with your Publishable Key
 const stripePromise = loadStripe('pk_test_51R36ot5Cp3FKy9pXvMULLqndqDyUzGP42VrvtY249XJndkp3V6LBDXLKuFZVtkxPwPKK1CCoGL9prPY33izsv1l500e0CIZUX9');
 
-function Home({ ownedClips, setOwnedClips }) {
-  const [clips] = useState([
-    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
-    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
-    { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/" },
-    { id: 4, title: "Surfing Wave", url: "https://www.pexels.com/video/a-man-surfing-857148/" },
-  ]);
+function Home({ ownedClips, setOwnedClips, clips }) {
   const handleHunt = () => {
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
     const alreadyOwned = ownedClips.some(clip => clip.id === randomClip.id);
@@ -23,8 +17,10 @@ function Home({ ownedClips, setOwnedClips }) {
   };
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h1>ClipHunt</h1>
-      <p>Hunt clips, trade with friends, and win rewards!</p>
+      <div className="header">
+        <h1>ClipHunt</h1>
+        <p>Hunt clips, trade with friends, and win rewards!</p>
+      </div>
       <button onClick={handleHunt}>Start Hunting</button>
       <h2>Clip Feed</h2>
       <div className="clip-feed">
@@ -37,14 +33,29 @@ function Home({ ownedClips, setOwnedClips }) {
       <div className="link-spacing"><Link to="/library">Go to Library</Link></div>
       <div className="link-spacing"><Link to="/waitlist">Join the Waitlist</Link></div>
       <div className="link-spacing"><Link to="/donate">Support ClipHunt</Link></div>
+      <div className="link-spacing"><Link to="/profile">View Profile</Link></div>
     </div>
   );
 }
 
-function Library({ ownedClips, setOwnedClips }) {
+function Library({ ownedClips, setOwnedClips, clips }) {
   const handleRemove = (id) => {
     setOwnedClips(ownedClips.filter(clip => clip.id !== id));
   };
+
+  const handleTrade = (id) => {
+    // Remove the clip being traded
+    const newOwnedClips = ownedClips.filter(clip => clip.id !== id);
+    // Get a random clip from the pool (excluding already owned clips)
+    const availableClips = clips.filter(clip => !newOwnedClips.some(owned => owned.id === clip.id));
+    if (availableClips.length === 0) {
+      alert("No new clips available to trade!");
+      return;
+    }
+    const randomClip = availableClips[Math.floor(Math.random() * availableClips.length)];
+    setOwnedClips([...newOwnedClips, randomClip]);
+  };
+
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>My Library</h1>
@@ -54,7 +65,9 @@ function Library({ ownedClips, setOwnedClips }) {
         <div className="library-feed">
           {ownedClips.map(clip => (
             <div key={clip.id} className="library-item">
-              <p>{clip.title} <button onClick={() => handleRemove(clip.id)}>Remove</button></p>
+              <p>{clip.title}</p>
+              <button onClick={() => handleRemove(clip.id)}>Remove</button>
+              <button onClick={() => handleTrade(clip.id)} style={{ marginLeft: '10px' }}>Trade</button>
             </div>
           ))}
         </div>
@@ -64,10 +77,9 @@ function Library({ ownedClips, setOwnedClips }) {
   );
 }
 
-function Waitlist() {
+function Waitlist({ waitlist, setWaitlist }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [waitlist, setWaitlist] = useState([]);
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
@@ -124,7 +136,7 @@ function Donate() {
     const { error } = await stripe.redirectToCheckout({
       lineItems: [
         {
-          price: 'price_1R37Pl5Cp3FKy9pX0WK8hoRu', // Updated with your Stripe Price ID
+          price: 'price_1R37Pl5Cp3FKy9pX0WK8hoRu',
           quantity: 1,
         },
       ],
@@ -142,7 +154,7 @@ function Donate() {
       <h1>Support ClipHunt</h1>
       <p>Your donation helps keep ClipHunt growing!</p>
       <button onClick={handleDonate}>Donate Now</button>
-      <Link to="/">Back to Home</Link>
+      <div className="link-spacing"><Link to="/">Back to Home</Link></div>
     </div>
   );
 }
@@ -165,18 +177,75 @@ function Cancel() {
   );
 }
 
+function Profile({ ownedClips, waitlist }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>My Profile</h1>
+      <h2>Total Waitlist Users: {waitlist.length}</h2>
+      <h2>Hunted Clips</h2>
+      {ownedClips.length === 0 ? (
+        <p>No clips hunted yet!</p>
+      ) : (
+        <div className="library-feed">
+          {ownedClips.map(clip => (
+            <div key={clip.id} className="library-item">
+              <p>{clip.title}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <h2>Waitlist Status</h2>
+      {waitlist.length === 0 ? (
+        <p>Not on the waitlist yet!</p>
+      ) : (
+        <div>
+          {waitlist.map((entry, index) => (
+            <p key={index}>Username: {entry.username}, Email: {entry.email}</p>
+          ))}
+        </div>
+      )}
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+}
+
 function App() {
-  const [ownedClips, setOwnedClips] = useState([]);
+  const [ownedClips, setOwnedClips] = useState(() => {
+    const savedClips = localStorage.getItem('ownedClips');
+    return savedClips ? JSON.parse(savedClips) : [];
+  });
+  const [waitlist, setWaitlist] = useState(() => {
+    const savedWaitlist = localStorage.getItem('waitlist');
+    return savedWaitlist ? JSON.parse(savedWaitlist) : [];
+  });
+  const [clips] = useState([
+    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
+    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
+    { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/" },
+    { id: 4, title: "Surfing Wave", url: "https://www.pexels.com/video/a-man-surfing-857148/" },
+  ]);
+
+  // Persist ownedClips to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('ownedClips', JSON.stringify(ownedClips));
+  }, [ownedClips]);
+
+  // Persist waitlist to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('waitlist', JSON.stringify(waitlist));
+  }, [waitlist]);
+
   return (
     <Elements stripe={stripePromise}>
       <Router>
         <Routes>
-          <Route path="/" element={<Home ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
-          <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
-          <Route path="/waitlist" element={<Waitlist />} />
+          <Route path="/" element={<Home ownedClips={ownedClips} setOwnedClips={setOwnedClips} clips={clips} />} />
+          <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} clips={clips} />} />
+          <Route path="/waitlist" element={<Waitlist waitlist={waitlist} setWaitlist={setWaitlist} />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
+          <Route path="/profile" element={<Profile ownedClips={ownedClips} waitlist={waitlist} />} />
         </Routes>
       </Router>
     </Elements>
