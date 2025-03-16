@@ -6,11 +6,11 @@ function Home({ ownedClips, setOwnedClips }) {
   const [clips, setClips] = useState([
     { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
     { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
+    { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/" },
+    { id: 4, title: "Surfing Wave", url: "https://www.pexels.com/video/a-man-surfing-857148/" },
   ]);
   const handleHunt = () => {
-    // Pick a random clip
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
-    // Check if clip is already in ownedClips
     const alreadyOwned = ownedClips.some(clip => clip.id === randomClip.id);
     if (!alreadyOwned) {
       setOwnedClips([...ownedClips, randomClip]);
@@ -29,12 +29,17 @@ function Home({ ownedClips, setOwnedClips }) {
           </div>
         ))}
       </div>
-      <Link to="/library">Go to Library</Link>
+      <br /><br /> {/* Added line breaks for spacing */}
+      <div className="link-spacing"><Link to="/library">Go to Library</Link></div>
+      <div className="link-spacing"><Link to="/waitlist">Join the Waitlist</Link></div>
     </div>
   );
 }
 
-function Library({ ownedClips }) {
+function Library({ ownedClips, setOwnedClips }) {
+  const handleRemove = (id) => {
+    setOwnedClips(ownedClips.filter(clip => clip.id !== id));
+  };
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>My Library</h1>
@@ -44,11 +49,65 @@ function Library({ ownedClips }) {
         <div className="library-feed">
           {ownedClips.map(clip => (
             <div key={clip.id} className="library-item">
-              <p>{clip.title}</p>
+              <p>{clip.title} <button onClick={() => handleRemove(clip.id)}>Remove</button></p>
             </div>
           ))}
         </div>
       )}
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+}
+
+function Waitlist() {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [waitlist, setWaitlist] = useState([]);
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!username || !email) {
+      setMessage('Please enter both a username and email.');
+      return;
+    }
+    const formattedUsername = `$${username}`;
+    const alreadyTaken = waitlist.some(entry => entry.username === formattedUsername);
+    if (alreadyTaken) {
+      setMessage(`Sorry, ${formattedUsername} is already taken.`);
+      return;
+    }
+    setWaitlist([...waitlist, { username: formattedUsername, email }]);
+    setMessage(`Success! You've reserved ${formattedUsername}.`);
+    setUsername('');
+    setEmail('');
+  };
+
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Join the ClipHunt Waitlist</h1>
+      <p>Reserve your $username and get early access!</p>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>$</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter your username"
+          />
+        </div>
+        <div style={{ margin: '10px 0' }}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+          />
+        </div>
+        <button type="submit">Join Waitlist</button>
+      </form>
+      {message && <p>{message}</p>}
       <Link to="/">Back to Home</Link>
     </div>
   );
@@ -60,7 +119,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
-        <Route path="/library" element={<Library ownedClips={ownedClips} />} />
+        <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
+        <Route path="/waitlist" element={<Waitlist />} />
       </Routes>
     </Router>
   );
