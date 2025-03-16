@@ -1,9 +1,14 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import React, { useState } from 'react';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import './App.css';
 
+// Initialize Stripe with your Publishable Key
+const stripePromise = loadStripe('pk_test_51R36ot5Cp3FKy9pXvMULLqndqDyUzGP42VrvtY249XJndkp3V6LBDXLKuFZVtkxPwPKK1CCoGL9prPY33izsv1l500e0CIZUX9');
+
 function Home({ ownedClips, setOwnedClips }) {
-  const [clips, setClips] = useState([
+  const [clips] = useState([
     { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
     { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
     { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/" },
@@ -29,9 +34,9 @@ function Home({ ownedClips, setOwnedClips }) {
           </div>
         ))}
       </div>
-      <br /><br /> {/* Added line breaks for spacing */}
       <div className="link-spacing"><Link to="/library">Go to Library</Link></div>
       <div className="link-spacing"><Link to="/waitlist">Join the Waitlist</Link></div>
+      <div className="link-spacing"><Link to="/donate">Support ClipHunt</Link></div>
     </div>
   );
 }
@@ -113,16 +118,68 @@ function Waitlist() {
   );
 }
 
+function Donate() {
+  const handleDonate = async () => {
+    const stripe = await stripePromise;
+    const { error } = await stripe.redirectToCheckout({
+      lineItems: [
+        {
+          price: 'price_1R37Pl5Cp3FKy9pX0WK8hoRu', // Updated with your Stripe Price ID
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      successUrl: 'http://localhost:3000/success',
+      cancelUrl: 'http://localhost:3000/cancel',
+    });
+    if (error) {
+      console.warn(error.message);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Support ClipHunt</h1>
+      <p>Your donation helps keep ClipHunt growing!</p>
+      <button onClick={handleDonate}>Donate Now</button>
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+}
+
+function Success() {
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Thank You!</h1>
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+}
+
+function Cancel() {
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Cancelled</h1>
+      <Link to="/">Back to Home</Link>
+    </div>
+  );
+}
+
 function App() {
   const [ownedClips, setOwnedClips] = useState([]);
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
-        <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
-        <Route path="/waitlist" element={<Waitlist />} />
-      </Routes>
-    </Router>
+    <Elements stripe={stripePromise}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
+          <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} />} />
+          <Route path="/waitlist" element={<Waitlist />} />
+          <Route path="/donate" element={<Donate />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Cancel />} />
+        </Routes>
+      </Router>
+    </Elements>
   );
 }
 

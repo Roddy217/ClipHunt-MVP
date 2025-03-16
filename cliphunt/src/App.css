@@ -82,3 +82,7 @@ form input {
   padding: 5px;
   margin: 0 5px;
 }
+
+.link-spacing {
+  margin: 15px 0;
+}
