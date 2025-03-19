@@ -22,12 +22,18 @@ function Home({ ownedClips, setOwnedClips, clips }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const filteredClips = filterClips(clips, selectedCategory);
   const clipCounts = countClipsByCategory(clips);
+  const [huntNotification, setHuntNotification] = useState('');
 
   const handleHunt = () => {
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
     const alreadyOwned = ownedClips.some(clip => clip.id === randomClip.id);
     if (!alreadyOwned) {
       setOwnedClips([...ownedClips, randomClip]);
+      setHuntNotification(`Added ${randomClip.title} to your library!`);
+      setTimeout(() => setHuntNotification(''), 2000);
+    } else {
+      setHuntNotification('Clip already owned!');
+      setTimeout(() => setHuntNotification(''), 2000);
     }
   };
 
@@ -38,6 +44,7 @@ function Home({ ownedClips, setOwnedClips, clips }) {
         <p>Hunt clips, trade with friends, and win rewards!</p>
       </div>
       <button onClick={handleHunt}>Start Hunting</button>
+      {huntNotification && <p style={{ color: 'green', marginTop: '10px' }}>{huntNotification}</p>}
       <h2>Clip Feed</h2>
       <select
         value={selectedCategory}
@@ -45,12 +52,9 @@ function Home({ ownedClips, setOwnedClips, clips }) {
         style={{ marginBottom: '20px', padding: '5px' }}
       >
         <option value="All">All Categories</option>
-        <option value="Funny">Funny</option>
-        <option value="Sports">Sports</option>
+        <option value="Funny">Funny ({clipCounts.Funny || 0})</option>
+        <option value="Sports">Sports ({clipCounts.Sports || 0})</option>
       </select>
-      <div>
-        <p>Clip Counts: Funny: {clipCounts.Funny || 0}, Sports: {clipCounts.Sports || 0}</p>
-      </div>
       <div className="clip-feed">
         {filteredClips.map(clip => (
           <div key={clip.id} className="clip-item">
@@ -67,8 +71,17 @@ function Home({ ownedClips, setOwnedClips, clips }) {
 }
 
 function Library({ ownedClips, setOwnedClips, clips }) {
+  const [notification, setNotification] = useState({ show: false, message: '', isTrade: false });
+
   const handleRemove = (id) => {
-    setOwnedClips(ownedClips.filter(clip => clip.id !== id));
+    const clipToRemove = ownedClips.find(clip => clip.id === id);
+    if (clipToRemove) {
+      setOwnedClips(ownedClips.filter(clip => clip.id !== id));
+      setNotification({ show: true, message: `Removed ${clipToRemove.title} from your library!`, isTrade: false });
+      setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
+    } else {
+      console.log("Clip not found for removal:", id);
+    }
   };
 
   const handleTrade = (id) => {
@@ -84,10 +97,17 @@ function Library({ ownedClips, setOwnedClips, clips }) {
 
     const randomClip = availableClips[Math.floor(Math.random() * availableClips.length)];
     setOwnedClips([...remainingClips, randomClip]);
+    setNotification({
+      show: true,
+      message: `Traded ${clipToTrade.title} for ${randomClip.title}!`,
+      isTrade: true,
+    });
+    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
+    console.log("Trade notification set:", `Traded ${clipToTrade.title} for ${randomClip.title}!`);
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
+    <div style={{ textAlign: 'center', padding: '20px', position: 'relative' }}>
       <h1>My Library</h1>
       {ownedClips.length === 0 ? (
         <p>No clips hunted yet!</p>
@@ -103,6 +123,25 @@ function Library({ ownedClips, setOwnedClips, clips }) {
         </div>
       )}
       <Link to="/">Back to Home</Link>
+      {notification.show && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: notification.isTrade ? 'green' : 'black',
+            color: notification.isTrade ? 'black' : 'red',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            zIndex: 1000,
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
+          }}
+        >
+          {notification.message}
+        </div>
+      )}
     </div>
   );
 }
