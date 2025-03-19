@@ -11,9 +11,17 @@ function filterClips(clips, category) {
   return category === 'All' ? clips : clips.filter(clip => clip.category === category);
 }
 
+function countClipsByCategory(clips) {
+  return clips.reduce((acc, clip) => {
+    acc[clip.category] = (acc[clip.category] || 0) + 1;
+    return acc;
+  }, {});
+}
+
 function Home({ ownedClips, setOwnedClips, clips }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const filteredClips = filterClips(clips, selectedCategory);
+  const clipCounts = countClipsByCategory(clips);
 
   const handleHunt = () => {
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
@@ -40,6 +48,9 @@ function Home({ ownedClips, setOwnedClips, clips }) {
         <option value="Funny">Funny</option>
         <option value="Sports">Sports</option>
       </select>
+      <div>
+        <p>Clip Counts: Funny: {clipCounts.Funny || 0}, Sports: {clipCounts.Sports || 0}</p>
+      </div>
       <div className="clip-feed">
         {filteredClips.map(clip => (
           <div key={clip.id} className="clip-item">
@@ -86,7 +97,7 @@ function Library({ ownedClips, setOwnedClips, clips }) {
             <div key={clip.id} className="library-item">
               <p>{clip.title}</p>
               <button onClick={() => handleRemove(clip.id)}>Remove</button>
-              <button onClick={() => handleTrade(clip.id)} style={{ marginLeft: '10px' }}>Trade</button>
+              <button onClick={() => handleTrade(clip.id)}>Trade</button>
             </div>
           ))}
         </div>
