@@ -8,6 +8,8 @@ import './App.css';
 const stripePromise = loadStripe('pk_test_51R36ot5Cp3FKy9pXvMULLqndqDyUzGP42VrvtY249XJndkp3V6LBDXLKuFZVtkxPwPKK1CCoGL9prPY33izsv1l500e0CIZUX9');
 
 function Home({ ownedClips, setOwnedClips, clips }) {
+  const [selectedCategory, setSelectedCategory] = useState('All'); // State for category filter
+
   const handleHunt = () => {
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
     const alreadyOwned = ownedClips.some(clip => clip.id === randomClip.id);
@@ -15,6 +17,12 @@ function Home({ ownedClips, setOwnedClips, clips }) {
       setOwnedClips([...ownedClips, randomClip]);
     }
   };
+
+  // Filter clips based on selected category
+  const filteredClips = selectedCategory === 'All'
+    ? clips
+    : clips.filter(clip => clip.category === selectedCategory);
+
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <div className="header">
@@ -23,8 +31,17 @@ function Home({ ownedClips, setOwnedClips, clips }) {
       </div>
       <button onClick={handleHunt}>Start Hunting</button>
       <h2>Clip Feed</h2>
+      <select
+        value={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
+        style={{ marginBottom: '20px', padding: '5px' }}
+      >
+        <option value="All">All Categories</option>
+        <option value="Funny">Funny</option>
+        <option value="Sports">Sports</option>
+      </select>
       <div className="clip-feed">
-        {clips.map(clip => (
+        {filteredClips.map(clip => (
           <div key={clip.id} className="clip-item">
             <p>{clip.title} - <a href={clip.url} target="_blank" rel="noopener noreferrer">Watch</a></p>
           </div>
@@ -44,16 +61,18 @@ function Library({ ownedClips, setOwnedClips, clips }) {
   };
 
   const handleTrade = (id) => {
-    // Remove the clip being traded
-    const newOwnedClips = ownedClips.filter(clip => clip.id !== id);
-    // Get a random clip from the pool (excluding already owned clips)
-    const availableClips = clips.filter(clip => !newOwnedClips.some(owned => owned.id === clip.id));
+    const clipToTrade = ownedClips.find(clip => clip.id === id);
+    if (!clipToTrade) return;
+
+    const remainingClips = ownedClips.filter(clip => clip.id !== id);
+    const availableClips = clips.filter(clip => !ownedClips.some(owned => owned.id === clip.id));
     if (availableClips.length === 0) {
       alert("No new clips available to trade!");
       return;
     }
+
     const randomClip = availableClips[Math.floor(Math.random() * availableClips.length)];
-    setOwnedClips([...newOwnedClips, randomClip]);
+    setOwnedClips([...remainingClips, randomClip]);
   };
 
   return (
@@ -131,29 +150,10 @@ function Waitlist({ waitlist, setWaitlist }) {
 }
 
 function Donate() {
-  const handleDonate = async () => {
-    const stripe = await stripePromise;
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: [
-        {
-          price: 'price_1R37Pl5Cp3FKy9pX0WK8hoRu',
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      successUrl: 'http://localhost:3000/success',
-      cancelUrl: 'http://localhost:3000/cancel',
-    });
-    if (error) {
-      console.warn(error.message);
-    }
-  };
-
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>Support ClipHunt</h1>
-      <p>Your donation helps keep ClipHunt growing!</p>
-      <button onClick={handleDonate}>Donate Now</button>
+      <p>Donations will be available soon! Stay tuned.</p>
       <div className="link-spacing"><Link to="/">Back to Home</Link></div>
     </div>
   );
@@ -219,18 +219,16 @@ function App() {
     return savedWaitlist ? JSON.parse(savedWaitlist) : [];
   });
   const [clips] = useState([
-    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/" },
-    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/" },
-    { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/" },
-    { id: 4, title: "Surfing Wave", url: "https://www.pexels.com/video/a-man-surfing-857148/" },
+    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/", category: "Funny" },
+    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/", category: "Sports" },
+    { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/", category: "Funny" },
+    { id: 4, title: "Surfing Wave", url: "https://www.pexels.com/video/a-man-surfing-857148/", category: "Sports" },
   ]);
 
-  // Persist ownedClips to localStorage whenever it changes
   React.useEffect(() => {
     localStorage.setItem('ownedClips', JSON.stringify(ownedClips));
   }, [ownedClips]);
 
-  // Persist waitlist to localStorage whenever it changes
   React.useEffect(() => {
     localStorage.setItem('waitlist', JSON.stringify(waitlist));
   }, [waitlist]);
