@@ -1,16 +1,6 @@
+/* src/App.css */
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
 }
 
 .App-header {
@@ -28,6 +18,17 @@
   color: #61dafb;
 }
 
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -37,19 +38,6 @@
   }
 }
 
-.clip-feed {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin: 20px;
-}
-
-.clip-item {
-  border: 1px solid #ccc;
-  padding: 10px;
-  text-align: center;
-}
-
 button {
   padding: 10px 20px;
   font-size: 16px;
@@ -57,20 +45,25 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
+
 button:hover {
   background-color: #2980b9;
 }
 
-.library-feed {
+.clip-feed {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin: 20px;
+  background-color: #2a2a2a; /* Slightly lighter gray for cards */
+  border-radius: 5px;
 }
 
-.library-item {
-  border: 1px solid #ccc;
+.clip-item {
+  border: 1px solid #444;
+  background-color: #333;
   padding: 10px;
   text-align: center;
 }
@@ -78,11 +71,60 @@ button:hover {
 form div {
   margin: 10px 0;
 }
+
 form input {
   padding: 5px;
   margin: 0 5px;
 }
 
+.header {
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  color: #1a73e8; /* Vibrant blue for the title */
+  margin-bottom: 10px;
+}
+
+.header p {
+  color: #555; /* Dark gray for the tagline */
+  font-size: 1.2rem;
+}
+
+.library-feed {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin: 20px;
+  background-color: #2a2a2a; /* Slightly lighter gray for cards */
+  border-radius: 5px;
+}
+
+.library-item {
+  border: 1px solid #444;
+  background-color: #333;
+  padding: 10px;
+  text-align: center;
+}
+
 .link-spacing {
-  margin: 15px 0;
+  margin: 30px 0; /* Increased for better separation */
+}
+/* Ensure buttons have a minimum touch target size and spacing */
+.library-item button {
+  margin: 5px; /* Add margin around each button */
+  padding: 8px 16px; /* Increase padding for better touch target */
+}
+
+/* Media query for mobile devices (screens smaller than 768px) */
+@media (max-width: 768px) {
+  .library-item {
+    padding: 15px; /* Increase padding for better spacing on mobile */
+  }
+
+  .library-item button {
+    margin: 8px; /* Larger margin for mobile */
+    padding: 10px 20px; /* Larger touch target */
+    display: inline-block; /* Ensure buttons stack horizontally */
+  }
 }

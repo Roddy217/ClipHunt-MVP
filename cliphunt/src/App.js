@@ -7,8 +7,13 @@ import './App.css';
 // Initialize Stripe with your Publishable Key
 const stripePromise = loadStripe('pk_test_51R36ot5Cp3FKy9pXvMULLqndqDyUzGP42VrvtY249XJndkp3V6LBDXLKuFZVtkxPwPKK1CCoGL9prPY33izsv1l500e0CIZUX9');
 
+function filterClips(clips, category) {
+  return category === 'All' ? clips : clips.filter(clip => clip.category === category);
+}
+
 function Home({ ownedClips, setOwnedClips, clips }) {
-  const [selectedCategory, setSelectedCategory] = useState('All'); // State for category filter
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const filteredClips = filterClips(clips, selectedCategory);
 
   const handleHunt = () => {
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
@@ -17,11 +22,6 @@ function Home({ ownedClips, setOwnedClips, clips }) {
       setOwnedClips([...ownedClips, randomClip]);
     }
   };
-
-  // Filter clips based on selected category
-  const filteredClips = selectedCategory === 'All'
-    ? clips
-    : clips.filter(clip => clip.category === selectedCategory);
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
