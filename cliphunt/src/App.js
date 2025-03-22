@@ -92,6 +92,10 @@ function Library({ ownedClips, setOwnedClips, clips }) {
     });
   };
 
+  const clearNotificationHistory = () => {
+    setNotificationHistory([]);
+  };
+
   const timeAgo = (timestamp) => {
     const seconds = Math.floor((Date.now() - timestamp) / 1000);
     if (seconds < 60) return `${seconds}s ago`;
@@ -109,22 +113,18 @@ function Library({ ownedClips, setOwnedClips, clips }) {
       setNotification({ show: true, message, isTrade: false });
       addNotificationToHistory(message, false);
       setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
-    } else {
-      console.log("Clip not found for removal:", id);
     }
   };
 
   const handleTrade = (id) => {
     const clipToTrade = ownedClips.find(clip => clip.id === id);
     if (!clipToTrade) return;
-
     const remainingClips = ownedClips.filter(clip => clip.id !== id);
     const availableClips = clips.filter(clip => !ownedClips.some(owned => owned.id === clip.id));
     if (availableClips.length === 0) {
       alert("No new clips available to trade!");
       return;
     }
-
     const randomClip = availableClips[Math.floor(Math.random() * availableClips.length)];
     setOwnedClips([...remainingClips, randomClip]);
     const message = `Traded ${clipToTrade.title} for ${randomClip.title}!`;
@@ -171,6 +171,12 @@ function Library({ ownedClips, setOwnedClips, clips }) {
             className="close-button"
           >
             ✕
+          </button>
+          <button
+            onClick={clearNotificationHistory}
+            style={{ margin: '10px 0', backgroundColor: '#e74c3c' }}
+          >
+            Clear All
           </button>
           {notificationHistory.length === 0 ? (
             <p>No notifications yet.</p>
