@@ -23,6 +23,7 @@ function Home({ ownedClips, setOwnedClips, clips }) {
   const filteredClips = filterClips(clips, selectedCategory);
   const clipCounts = countClipsByCategory(clips);
   const [huntNotification, setHuntNotification] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleHunt = () => {
     const randomClip = clips[Math.floor(Math.random() * clips.length)];
@@ -62,22 +63,42 @@ function Home({ ownedClips, setOwnedClips, clips }) {
           </div>
         ))}
       </div>
-      <div className="link-spacing"><Link to="/library">Go to Library</Link></div>
-      <div className="link-spacing"><Link to="/waitlist">Join the Waitlist</Link></div>
-      <div className="link-spacing"><Link to="/donate">Support ClipHunt</Link></div>
-      <div className="link-spacing"><Link to="/profile">View Profile</Link></div>
+      <div className="hamburger-menu">
+        <button onClick={() => setMenuOpen(!menuOpen)} style={{ fontSize: '24px', background: 'none', border: 'none', cursor: 'pointer' }}>
+          ☰
+        </button>
+        {menuOpen && (
+          <div className="menu-items">
+            <div className="link-spacing"><Link to="/library" onClick={() => setMenuOpen(false)}>Go to Library</Link></div>
+            <div className="link-spacing"><Link to="/waitlist" onClick={() => setMenuOpen(false)}>Join the Waitlist</Link></div>
+            <div className="link-spacing"><Link to="/donate" onClick={() => setMenuOpen(false)}>Support ClipHunt</Link></div>
+            <div className="link-spacing"><Link to="/profile" onClick={() => setMenuOpen(false)}>View Profile</Link></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 function Library({ ownedClips, setOwnedClips, clips }) {
   const [notification, setNotification] = useState({ show: false, message: '', isTrade: false });
+  const [notificationHistory, setNotificationHistory] = useState([]);
+  const [showNotificationOverlay, setShowNotificationOverlay] = useState(false);
+
+  const addNotificationToHistory = (message, isTrade) => {
+    setNotificationHistory(prev => {
+      const newHistory = [{ message, isTrade, timestamp: Date.now() }, ...prev].slice(0, 10);
+      return newHistory;
+    });
+  };
 
   const handleRemove = (id) => {
     const clipToRemove = ownedClips.find(clip => clip.id === id);
     if (clipToRemove) {
       setOwnedClips(ownedClips.filter(clip => clip.id !== id));
-      setNotification({ show: true, message: `Removed ${clipToRemove.title} from your library!`, isTrade: false });
+      const message = `Removed ${clipToRemove.title} from your library!`;
+      setNotification({ show: true, message, isTrade: false });
+      addNotificationToHistory(message, false);
       setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
     } else {
       console.log("Clip not found for removal:", id);
@@ -97,18 +118,21 @@ function Library({ ownedClips, setOwnedClips, clips }) {
 
     const randomClip = availableClips[Math.floor(Math.random() * availableClips.length)];
     setOwnedClips([...remainingClips, randomClip]);
-    setNotification({
-      show: true,
-      message: `Traded ${clipToTrade.title} for ${randomClip.title}!`,
-      isTrade: true,
-    });
+    const message = `Traded ${clipToTrade.title} for ${randomClip.title}!`;
+    setNotification({ show: true, message, isTrade: true });
+    addNotificationToHistory(message, true);
     setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
-    console.log("Trade notification set:", `Traded ${clipToTrade.title} for ${randomClip.title}!`);
   };
 
   return (
     <div style={{ textAlign: 'center', padding: '20px', position: 'relative' }}>
       <h1>My Library</h1>
+      <div
+        className="notification-icon"
+        onClick={() => setShowNotificationOverlay(!showNotificationOverlay)}
+      >
+        🔔
+      </div>
       {ownedClips.length === 0 ? (
         <p>No clips hunted yet!</p>
       ) : (
@@ -122,24 +146,35 @@ function Library({ ownedClips, setOwnedClips, clips }) {
           ))}
         </div>
       )}
-      <Link to="/">Back to Home</Link>
+      <Link to="/" className="back-to-home">Back to Home</Link>
       {notification.show && (
         <div
-          style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: notification.isTrade ? 'green' : 'black',
-            color: notification.isTrade ? 'black' : 'red',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            fontWeight: 'bold',
-            zIndex: 1000,
-            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.3)',
-          }}
+          className={`notification-popup ${notification.isTrade ? 'notification-trade' : 'notification-remove'}`}
         >
           {notification.message}
+        </div>
+      )}
+      {showNotificationOverlay && (
+        <div className="notification-overlay">
+          <h3>Notifications</h3>
+          <button
+            onClick={() => setShowNotificationOverlay(false)}
+            className="close-button"
+          >
+            ✕
+          </button>
+          {notificationHistory.length === 0 ? (
+            <p>No notifications yet.</p>
+          ) : (
+            notificationHistory.map((notif, index) => (
+              <div
+                key={index}
+                className={`notification-item ${notif.isTrade ? 'trade' : 'remove'}`}
+              >
+                {notif.message}
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -194,7 +229,7 @@ function Waitlist({ waitlist, setWaitlist }) {
         <button type="submit">Join Waitlist</button>
       </form>
       {message && <p>{message}</p>}
-      <Link to="/">Back to Home</Link>
+      <Link to="/" className="back-to-home">Back to Home</Link>
     </div>
   );
 }
@@ -204,7 +239,7 @@ function Donate() {
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>Support ClipHunt</h1>
       <p>Donations will be available soon! Stay tuned.</p>
-      <div className="link-spacing"><Link to="/">Back to Home</Link></div>
+      <Link to="/" className="back-to-home">Back to Home</Link>
     </div>
   );
 }
@@ -213,7 +248,7 @@ function Success() {
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>Thank You!</h1>
-      <Link to="/">Back to Home</Link>
+      <Link to="/" className="back-to-home">Back to Home</Link>
     </div>
   );
 }
@@ -222,7 +257,7 @@ function Cancel() {
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>Cancelled</h1>
-      <Link to="/">Back to Home</Link>
+      <Link to="/" className="back-to-home">Back to Home</Link>
     </div>
   );
 }
@@ -254,7 +289,7 @@ function Profile({ ownedClips, waitlist }) {
           ))}
         </div>
       )}
-      <Link to="/">Back to Home</Link>
+      <Link to="/" className="back-to-home">Back to Home</Link>
     </div>
   );
 }
