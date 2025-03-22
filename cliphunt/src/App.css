@@ -37,6 +37,13 @@
   }
 }
 
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .back-to-home {
   display: block;
   margin-top: 20px;
@@ -98,7 +105,7 @@ form input {
 }
 
 .hamburger-button {
-  font-size: 32px; /* Larger icon size */
+  font-size: 32px;
   background: none;
   border: none;
   cursor: pointer;
@@ -125,7 +132,7 @@ form input {
 }
 
 .join-waitlist-button {
-  margin-bottom: 20px; /* Add spacing below the button */
+  margin-bottom: 30px; /* Increased spacing */
 }
 
 .library-feed {
@@ -180,19 +187,22 @@ form input {
 }
 
 .notification-item {
-  padding: 10px;
+  padding: 10px 15px;
   margin-bottom: 10px;
   border-radius: 5px;
   font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .notification-item.even {
-  background-color: rgba(30, 30, 30, 0.8); /* Darker opaque shade */
+  background-color: rgba(30, 30, 30, 0.8);
   color: #f0f0f0;
 }
 
 .notification-item.odd {
-  background-color: rgba(50, 50, 50, 0.8); /* Slightly lighter opaque shade */
+  background-color: rgba(50, 50, 50, 0.8);
   color: #f0f0f0;
 }
 
@@ -202,7 +212,7 @@ form input {
   right: 0;
   width: 300px;
   height: 100%;
-  background-color: rgba(26, 26, 26, 0.9); /* Semi-transparent background */
+  background-color: rgba(26, 26, 26, 0.9);
   color: #f0f0f0;
   padding: 20px;
   z-index: 1000;
@@ -216,14 +226,23 @@ form input {
 
 .notification-popup {
   position: fixed;
-  top: 10%; /* Move to top center */
-  left: 50%;
-  transform: translateX(-50%); /* Center horizontally */
+  top: 50px;
+  right: 10px;
+  transform: none;
   padding: 10px 20px;
   border-radius: 5px;
   font-weight: bold;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  animation: fadeInOut 2s ease-in-out;
+}
+
+.notification-timestamp {
+  font-size: 0.8em;
+  opacity: 0.7;
+  margin-left: 15px;
+  min-width: 60px; /* Ensures timestamp has its own space */
+  text-align: right; /* Keeps it neatly aligned */
 }
 
 .notification-trade {
