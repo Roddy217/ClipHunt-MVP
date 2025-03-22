@@ -126,7 +126,7 @@ function Library({ ownedClips, setOwnedClips, clips, clipCoins, setClipCoins }) 
       addNotificationToHistory(`Earned ${coinsEarned} ClipCoins for completing sets!`, false);
       setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
     }
-  }, [setClipCoins, setNotification, addNotificationToHistory]);
+  }, [setClipCoins, setNotification, addNotificationToHistory, checkCompletedSets]);
 
   const handleRemove = useCallback((id) => {
     const clipToRemove = ownedClips.find(clip => clip.id === id);
