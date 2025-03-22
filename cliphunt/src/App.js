@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import './App.css';
@@ -80,17 +80,17 @@ function Home({ ownedClips, setOwnedClips, clips }) {
   );
 }
 
-function Library({ ownedClips, setOwnedClips, clips }) {
+function Library({ ownedClips, setOwnedClips, clips, clipCoins, setClipCoins }) {
   const [notification, setNotification] = useState({ show: false, message: '', isTrade: false });
   const [notificationHistory, setNotificationHistory] = useState([]);
   const [showNotificationOverlay, setShowNotificationOverlay] = useState(false);
 
-  const addNotificationToHistory = (message, isTrade) => {
+  const addNotificationToHistory = useCallback((message, isTrade) => {
     setNotificationHistory(prev => {
       const newHistory = [{ message, isTrade, timestamp: Date.now() }, ...prev].slice(0, 10);
       return newHistory;
     });
-  };
+  }, []);
 
   const clearNotificationHistory = () => {
     setNotificationHistory([]);
@@ -105,7 +105,29 @@ function Library({ ownedClips, setOwnedClips, clips }) {
     return `${hours}h ago`;
   };
 
-  const handleRemove = (id) => {
+  const checkCompletedSets = useCallback(() => {
+    const sets = {};
+    ownedClips.forEach(clip => {
+      sets[clip.setId] = (sets[clip.setId] || 0) + 1;
+    });
+    const allSets = [...new Set(clips.map(c => c.setId))];
+    return allSets.filter(setId => 
+      sets[setId] === clips.filter(c => c.setId === setId).length
+    );
+  }, [clips, ownedClips]);
+
+  const handleSetCompletion = useCallback(() => {
+    const completed = checkCompletedSets();
+    if (completed.length > 0) {
+      const coinsEarned = completed.length * 50; // 50 ClipCoins per set
+      setClipCoins(prev => prev + coinsEarned);
+      setNotification({ show: true, message: `Earned ${coinsEarned} ClipCoins for completing sets!`, isTrade: false });
+      addNotificationToHistory(`Earned ${coinsEarned} ClipCoins for completing sets!`, false);
+      setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
+    }
+  }, [setClipCoins, setNotification, addNotificationToHistory]);
+
+  const handleRemove = useCallback((id) => {
     const clipToRemove = ownedClips.find(clip => clip.id === id);
     if (clipToRemove) {
       setOwnedClips(ownedClips.filter(clip => clip.id !== id));
@@ -114,9 +136,9 @@ function Library({ ownedClips, setOwnedClips, clips }) {
       addNotificationToHistory(message, false);
       setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
     }
-  };
+  }, [ownedClips, setOwnedClips, setNotification, addNotificationToHistory]);
 
-  const handleTrade = (id) => {
+  const handleTrade = useCallback((id) => {
     const clipToTrade = ownedClips.find(clip => clip.id === id);
     if (!clipToTrade) return;
     const remainingClips = ownedClips.filter(clip => clip.id !== id);
@@ -131,11 +153,18 @@ function Library({ ownedClips, setOwnedClips, clips }) {
     setNotification({ show: true, message, isTrade: true });
     addNotificationToHistory(message, true);
     setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
-  };
+  }, [ownedClips, clips, setOwnedClips, setNotification, addNotificationToHistory]);
+
+  useEffect(() => {
+    handleSetCompletion();
+  }, [ownedClips, handleSetCompletion]);
+
+  const completedSets = checkCompletedSets();
 
   return (
     <div style={{ textAlign: 'center', padding: '20px', position: 'relative' }}>
       <h1>My Library</h1>
+      <h3>ClipCoins: {clipCoins}</h3>
       <div
         className="notification-icon"
         onClick={() => setShowNotificationOverlay(!showNotificationOverlay)}
@@ -152,6 +181,14 @@ function Library({ ownedClips, setOwnedClips, clips }) {
               <button onClick={() => handleRemove(clip.id)}>Remove</button>
               <button onClick={() => handleTrade(clip.id)}>Trade</button>
             </div>
+          ))}
+        </div>
+      )}
+      {completedSets.length > 0 && (
+        <div>
+          <h2>Completed Sets</h2>
+          {completedSets.map(setId => (
+            <p key={setId}>Completed: {setId}!</p>
           ))}
         </div>
       )}
@@ -319,27 +356,35 @@ function App() {
     const savedWaitlist = localStorage.getItem('waitlist');
     return savedWaitlist ? JSON.parse(savedWaitlist) : [];
   });
+  const [clipCoins, setClipCoins] = useState(() => {
+    const savedCoins = localStorage.getItem('clipCoins');
+    return savedCoins ? parseInt(savedCoins, 10) : 0;
+  });
   const [clips] = useState([
-    { id: 1, title: "Funny Cat", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/", category: "Funny" },
-    { id: 2, title: "Epic Skate", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/", category: "Sports" },
-    { id: 3, title: "Dancing Dog", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/", category: "Funny" },
-    { id: 4, title: "Surfing Wave", url: "https://www.pexels.com/video/a-man-surfing-857148/", category: "Sports" },
+    { id: 1, title: "Funny Cat Pt1", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/", category: "Funny", setId: "cat-story" },
+    { id: 2, title: "Funny Cat Pt2", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/", category: "Funny", setId: "cat-story" },
+    { id: 3, title: "Epic Skate Pt1", url: "https://www.pexels.com/video/skateboarder-doing-a-trick-854302/", category: "Sports", setId: "skate-trick" },
+    { id: 4, title: "Epic Skate Pt2", url: "https://www.pexels.com/video/a-man-surfing-857148/", category: "Sports", setId: "skate-trick" },
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('ownedClips', JSON.stringify(ownedClips));
   }, [ownedClips]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('waitlist', JSON.stringify(waitlist));
   }, [waitlist]);
+
+  useEffect(() => {
+    localStorage.setItem('clipCoins', clipCoins.toString());
+  }, [clipCoins]);
 
   return (
     <Elements stripe={stripePromise}>
       <Router>
         <Routes>
           <Route path="/" element={<Home ownedClips={ownedClips} setOwnedClips={setOwnedClips} clips={clips} />} />
-          <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} clips={clips} />} />
+          <Route path="/library" element={<Library ownedClips={ownedClips} setOwnedClips={setOwnedClips} clips={clips} clipCoins={clipCoins} setClipCoins={setClipCoins} />} />
           <Route path="/waitlist" element={<Waitlist waitlist={waitlist} setWaitlist={setWaitlist} />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/success" element={<Success />} />
