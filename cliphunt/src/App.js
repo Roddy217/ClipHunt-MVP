@@ -39,7 +39,20 @@ function Home({ ownedClips, setOwnedClips, clips }) {
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
+    <div style={{ textAlign: 'center', padding: '20px', position: 'relative' }}>
+      <div className="hamburger-menu">
+        <button onClick={() => setMenuOpen(!menuOpen)} className="hamburger-button">
+          ☰
+        </button>
+        {menuOpen && (
+          <div className="menu-items">
+            <div className="link-spacing"><Link to="/library" onClick={() => setMenuOpen(false)}>Go to Library</Link></div>
+            <div className="link-spacing"><Link to="/waitlist" onClick={() => setMenuOpen(false)}>Join the Waitlist</Link></div>
+            <div className="link-spacing"><Link to="/donate" onClick={() => setMenuOpen(false)}>Support ClipHunt</Link></div>
+            <div className="link-spacing"><Link to="/profile" onClick={() => setMenuOpen(false)}>View Profile</Link></div>
+          </div>
+        )}
+      </div>
       <div className="header">
         <h1>ClipHunt</h1>
         <p>Hunt clips, trade with friends, and win rewards!</p>
@@ -63,19 +76,6 @@ function Home({ ownedClips, setOwnedClips, clips }) {
           </div>
         ))}
       </div>
-      <div className="hamburger-menu">
-        <button onClick={() => setMenuOpen(!menuOpen)} style={{ fontSize: '24px', background: 'none', border: 'none', cursor: 'pointer' }}>
-          ☰
-        </button>
-        {menuOpen && (
-          <div className="menu-items">
-            <div className="link-spacing"><Link to="/library" onClick={() => setMenuOpen(false)}>Go to Library</Link></div>
-            <div className="link-spacing"><Link to="/waitlist" onClick={() => setMenuOpen(false)}>Join the Waitlist</Link></div>
-            <div className="link-spacing"><Link to="/donate" onClick={() => setMenuOpen(false)}>Support ClipHunt</Link></div>
-            <div className="link-spacing"><Link to="/profile" onClick={() => setMenuOpen(false)}>View Profile</Link></div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -90,6 +90,15 @@ function Library({ ownedClips, setOwnedClips, clips }) {
       const newHistory = [{ message, isTrade, timestamp: Date.now() }, ...prev].slice(0, 10);
       return newHistory;
     });
+  };
+
+  const timeAgo = (timestamp) => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ago`;
   };
 
   const handleRemove = (id) => {
@@ -169,9 +178,10 @@ function Library({ ownedClips, setOwnedClips, clips }) {
             notificationHistory.map((notif, index) => (
               <div
                 key={index}
-                className={`notification-item ${notif.isTrade ? 'trade' : 'remove'}`}
+                className={`notification-item ${index % 2 === 0 ? 'even' : 'odd'}`}
               >
-                {notif.message}
+                <span>{notif.message}</span>
+                <span className="notification-timestamp">{timeAgo(notif.timestamp)}</span>
               </div>
             ))
           )}
@@ -226,7 +236,7 @@ function Waitlist({ waitlist, setWaitlist }) {
             placeholder="Enter your email"
           />
         </div>
-        <button type="submit">Join Waitlist</button>
+        <button type="submit" className="join-waitlist-button">Join Waitlist</button>
       </form>
       {message && <p>{message}</p>}
       <Link to="/" className="back-to-home">Back to Home</Link>
