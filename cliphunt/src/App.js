@@ -119,7 +119,7 @@ function Library({ ownedClips, setOwnedClips, clips, clipCoins, setClipCoins }) 
   const handleSetCompletion = useCallback(() => {
     const completed = checkCompletedSets();
     if (completed.length > 0) {
-      const coinsEarned = completed.length * 50; // 50 ClipCoins per set
+      const coinsEarned = completed.length * 50;
       setClipCoins(prev => prev + coinsEarned);
       setNotification({ show: true, message: `Earned ${coinsEarned} ClipCoins for completing sets!`, isTrade: false });
       addNotificationToHistory(`Earned ${coinsEarned} ClipCoins for completing sets!`, false);
@@ -155,6 +155,17 @@ function Library({ ownedClips, setOwnedClips, clips, clipCoins, setClipCoins }) 
     setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
   }, [ownedClips, clips, setOwnedClips, setNotification, addNotificationToHistory]);
 
+  const handleRedeem = () => {
+    if (clipCoins >= 100) {
+      setClipCoins(prev => prev - 100);
+      setNotification({ show: true, message: 'Redeemed 100 ClipCoins for a prize!', isTrade: false });
+      addNotificationToHistory('Redeemed 100 ClipCoins for a prize!', false);
+      setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
+    } else {
+      alert('Need 100 ClipCoins to redeem a prize!');
+    }
+  };
+
   useEffect(() => {
     handleSetCompletion();
   }, [ownedClips, handleSetCompletion]);
@@ -165,6 +176,7 @@ function Library({ ownedClips, setOwnedClips, clips, clipCoins, setClipCoins }) 
     <div style={{ textAlign: 'center', padding: '20px', position: 'relative' }}>
       <h1>My Library</h1>
       <h3>ClipCoins: {clipCoins}</h3>
+      <button onClick={handleRedeem} style={{ margin: '10px', backgroundColor: '#f1c40f' }}>Redeem Prize (100 Coins)</button>
       <div
         className="notification-icon"
         onClick={() => setShowNotificationOverlay(!showNotificationOverlay)}
