@@ -1,4 +1,3 @@
-/* src/App.css */
 .App {
   text-align: center;
 }
@@ -38,6 +37,17 @@
   }
 }
 
+.back-to-home {
+  display: block;
+  margin-top: 20px;
+  color: #f0f0f0;
+  text-decoration: none;
+}
+
+.back-to-home:hover {
+  color: #ffffff;
+}
+
 button {
   padding: 10px 20px;
   font-size: 16px;
@@ -57,7 +67,7 @@ button:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin: 20px;
-  background-color: #2a2a2a; /* Slightly lighter gray for cards */
+  background-color: #2a2a2a;
   border-radius: 5px;
 }
 
@@ -66,6 +76,16 @@ button:hover {
   background-color: #333;
   padding: 10px;
   text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #f0f0f0;
+  cursor: pointer;
 }
 
 form div {
@@ -77,18 +97,35 @@ form input {
   margin: 0 5px;
 }
 
+.hamburger-button {
+  font-size: 32px; /* Larger icon size */
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburger-menu {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
 .header {
   margin-bottom: 20px;
 }
 
 .header h1 {
-  color: #1a73e8; /* Vibrant blue for the title */
+  color: #1a73e8;
   margin-bottom: 10px;
 }
 
 .header p {
-  color: #555; /* Dark gray for the tagline */
+  color: #555;
   font-size: 1.2rem;
+}
+
+.join-waitlist-button {
+  margin-bottom: 20px; /* Add spacing below the button */
 }
 
 .library-feed {
@@ -96,7 +133,7 @@ form input {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin: 20px;
-  background-color: #2a2a2a; /* Slightly lighter gray for cards */
+  background-color: #2a2a2a;
   border-radius: 5px;
 }
 
@@ -107,33 +144,81 @@ form input {
   text-align: center;
 }
 
-.link-spacing {
-  margin: 30px 0; /* Increased for better separation */
-}
-/* Ensure buttons have a minimum touch target size and spacing */
 .library-item button {
-  margin: 5px; /* Add margin around each button */
-  padding: 8px 16px; /* Increase padding for better touch target */
+  margin: 5px;
+  padding: 8px 16px;
 }
 
-/* Media query for mobile devices (screens smaller than 768px) */
-@media (max-width: 768px) {
-  .library-item {
-    padding: 15px; /* Increase padding for better spacing on mobile */
-  }
+.link-spacing {
+  margin: 30px 0;
+}
 
-  .library-item button {
-    margin: 8px; /* Larger margin for mobile */
-    padding: 10px 20px; /* Larger touch target */
-    display: inline-block; /* Ensure buttons stack horizontally */
-  }
+.menu-items {
+  background-color: #1a1a1a;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.menu-items a {
+  color: #f0f0f0;
+  text-decoration: none;
+  display: block;
+  padding: 5px 0;
+}
+
+.menu-items a:hover {
+  color: #ffffff;
+}
+
+.notification-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.notification-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.notification-item.even {
+  background-color: rgba(30, 30, 30, 0.8); /* Darker opaque shade */
+  color: #f0f0f0;
+}
+
+.notification-item.odd {
+  background-color: rgba(50, 50, 50, 0.8); /* Slightly lighter opaque shade */
+  color: #f0f0f0;
+}
+
+.notification-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  background-color: rgba(26, 26, 26, 0.9); /* Semi-transparent background */
+  color: #f0f0f0;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+}
+
+.notification-overlay h3 {
+  margin-top: 0;
 }
 
 .notification-popup {
   position: fixed;
-  top: 50%;
+  top: 10%; /* Move to top center */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%); /* Center horizontally */
   padding: 10px 20px;
   border-radius: 5px;
   font-weight: bold;
@@ -151,17 +236,15 @@ form input {
   color: red;
 }
 
-.hamburger-menu {
-  margin-top: 20px;
-}
+/* Media query for mobile devices (screens smaller than 768px) */
+@media (max-width: 768px) {
+  .library-item {
+    padding: 15px;
+  }
 
-.menu-items a {
-  color: #f0f0f0;
-  text-decoration: none;
-  display: block;
-  padding: 5px 0;
-}
-
-.menu-items a:hover {
-  color: #ffffff;
+  .library-item button {
+    margin: 8px;
+    padding: 10px 20px;
+    display: inline-block;
+  }
 }
