@@ -50,6 +50,7 @@ function Home({ ownedClips, setOwnedClips, clips }) {
             <div className="link-spacing"><Link to="/waitlist" onClick={() => setMenuOpen(false)}>Join the Waitlist</Link></div>
             <div className="link-spacing"><Link to="/donate" onClick={() => setMenuOpen(false)}>Support ClipHunt</Link></div>
             <div className="link-spacing"><Link to="/profile" onClick={() => setMenuOpen(false)}>View Profile</Link></div>
+            <div className="link-spacing"><Link to="/prizes" onClick={() => setMenuOpen(false)}>Prize Store</Link></div>
           </div>
         )}
       </div>
@@ -177,6 +178,7 @@ function Library({ ownedClips, setOwnedClips, clips, clipCoins, setClipCoins }) 
       <h1>My Library</h1>
       <h3>ClipCoins: {clipCoins}</h3>
       <button onClick={handleRedeem} style={{ margin: '10px', backgroundColor: '#f1c40f' }}>Redeem Prize (100 Coins)</button>
+      <Link to="/prizes" className="redeem-link">Visit Prize Store</Link>
       <div
         className="notification-icon"
         onClick={() => setShowNotificationOverlay(!showNotificationOverlay)}
@@ -359,6 +361,41 @@ function Profile({ ownedClips, waitlist }) {
   );
 }
 
+function Prizes({ clipCoins, setClipCoins, setNotification }) {
+  const prizes = [
+    { id: 1, name: 'Extra Clip Slot', cost: 100, description: 'Add one more slot to your library.' },
+    { id: 2, name: 'Rare Clip Badge', cost: 200, description: 'Show off your rare clip status.' },
+  ];
+
+  const handleRedeem = (prize) => {
+    if (clipCoins >= prize.cost) {
+      setClipCoins(prev => prev - prize.cost);
+      setNotification({ show: true, message: `Redeemed ${prize.name} for ${prize.cost} ClipCoins!`, isTrade: false });
+      setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 2000);
+    } else {
+      alert(`Need ${prize.cost} ClipCoins to redeem ${prize.name}!`);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Prize Store</h1>
+      <h3>ClipCoins: {clipCoins}</h3>
+      <div className="prize-feed">
+        {prizes.map(prize => (
+          <div key={prize.id} className="prize-item">
+            <h4>{prize.name}</h4>
+            <p>{prize.description}</p>
+            <p>Cost: {prize.cost} ClipCoins</p>
+            <button onClick={() => handleRedeem(prize)}>Redeem</button>
+          </div>
+        ))}
+      </div>
+      <Link to="/library" className="back-to-home">Back to Library</Link>
+    </div>
+  );
+}
+
 function App() {
   const [ownedClips, setOwnedClips] = useState(() => {
     const savedClips = localStorage.getItem('ownedClips');
@@ -372,6 +409,7 @@ function App() {
     const savedCoins = localStorage.getItem('clipCoins');
     return savedCoins ? parseInt(savedCoins, 10) : 0;
   });
+  const [notification, setNotification] = useState({ show: false, message: '', isTrade: false });
   const [clips] = useState([
     { id: 1, title: "Funny Cat Pt1", url: "https://www.pexels.com/video/cat-playing-with-toy-855282/", category: "Funny", setId: "cat-story" },
     { id: 2, title: "Funny Cat Pt2", url: "https://www.pexels.com/video/a-small-dog-running-around-10598107/", category: "Funny", setId: "cat-story" },
@@ -402,6 +440,7 @@ function App() {
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
           <Route path="/profile" element={<Profile ownedClips={ownedClips} waitlist={waitlist} />} />
+          <Route path="/prizes" element={<Prizes clipCoins={clipCoins} setClipCoins={setClipCoins} setNotification={setNotification} />} />
         </Routes>
       </Router>
     </Elements>
